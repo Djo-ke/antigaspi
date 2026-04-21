@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="description" content="Anti Gaspi - Réduisez le gaspillage alimentaire avec l'IA">
+    <title>Anti Gaspi - IA Réelle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff6b35;
+            --secondary: #f7931e;
+            --accent: #fdb833;
+            --dark: #0a0a0a;
+            --darker: #1a1a1a;
+            --surface: #2d2d2d;
+            --border: #404040;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --success: #00d084;
+            --error: #ff3366;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-frame {
+            width: 100%;
+            height: 100vh;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            height: 45px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ÉCRAN SETUP */
+        .screen-setup.active {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .setup-card {
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 300px;
+        }
+
+        .setup-card h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .setup-card p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            text-align: left;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--dark);
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        /* ÉCRAN ACCUEIL */
+        .screen-welcome.active {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 70px;
+            margin-bottom: 16px;
+        }
+
+        .welcome-text h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .welcome-text p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* ÉCRAN CAMÉRA */
+        .screen-camera.active {
+            flex: 1;
+        }
+
+        .camera-container {
+            flex: 1;
+            background: var(--dark);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .camera-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-placeholder {
+            position: absolute;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .camera-placeholder-icon {
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-camera {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: var(--surface);
+            color: var(--primary);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            border: 2px solid var(--border);
+        }
+
+        .btn-camera:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .btn-camera.capture {
+            width: 70px;
+            height: 70px;
+            font-size: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
+
+        .btn-camera:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ÉCRANS RECETTES */
+        .screen-recipes.active,
+        .screen-detail.active {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .recipes-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .ingredients-box {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .ingredients-box h3 {
+            color: var(--primary);
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .ingredients-box p {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .recipes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .recipe-card {
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recipe-card:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .recipe-card h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .recipe-card p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .recipe-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            background: rgba(255, 107, 53, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .section {
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .ingredient-item {
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .ingredient-item .qty {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 10px;
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 12px;
+            line-height: 1.4;
+            padding-top: 2px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            position: fixed;
+            top: 50px;
+            left: 16px;
+            right: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            border-left: 4px solid;
+            z-index: 2000;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .message.success {
+            background: rgba(0, 208, 132, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .message.error {
+            background: rgba(255, 51, 102, 0.1);
+            color: var(--error);
+            border-color: var(--error);
+        }
+
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="status-bar">
+            <span id="time">11:30</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <div class="app-container">
+            <div class="header">
+                <h1>♻️ Anti Gaspi</h1>
+                <p>Scanner IA d'aliments - Détection réelle</p>
+            </div>
+
+            <div class="content">
+                <!-- ÉCRAN SETUP -->
+                <div id="screenSetup" class="screen active screen-setup">
+                    <div class="setup-card">
+                        <h2>🔑 Configuration</h2>
+                        <p>Entrez votre clé API Claude pour activer la détection IA réelle des aliments.</p>
+                        <div class="input-group">
+                            <label>Clé API Claude</label>
+                            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+                        </div>
+                        <button class="btn btn-primary" onclick="setupAPI()">✅ Confirmer</button>
+                        <p style="color: var(--text-secondary); font-size: 11px; margin-top: 12px;">
+                            Créer une clé: <a href="https://console.anthropic.com/api/keys" target="_blank" style="color: var(--primary);">console.anthropic.com</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ÉCRAN ACCUEIL -->
+                <div id="screenWelcome" class="screen screen-welcome">
+                    <div class="welcome-icon">♻️</div>
+                    <div class="welcome-text">
+                        <h2>Bienvenue!</h2>
+                        <p>Photographiez vos aliments. L'IA détecte ce que vous avez et vous propose des recettes créatives.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="startApp()">🚀 Commencer</button>
+                    <button class="btn btn-secondary" onclick="changeAPI()" style="margin-top: 12px;">🔑 Changer clé API</button>
+                </div>
+
+                <!-- ÉCRAN CAMÉRA -->
+                <div id="screenCamera" class="screen screen-camera">
+                    <div class="camera-container">
+                        <video id="videoStream" autoplay playsinline muted></video>
+                        <canvas id="captureCanvas" style="display:none;"></canvas>
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <div class="camera-placeholder-icon">📷</div>
+                            <div>Caméra en cours...</div>
+                        </div>
+                    </div>
+                    <div class="camera-controls">
+                        <button class="btn-camera" onclick="switchCamera()" title="Basculer">🔄</button>
+                        <button class="btn-camera capture" onclick="capturePhoto()" id="captureBtn">📸</button>
+                    </div>
+                </div>
+
+                <!-- ÉCRAN RECETTES -->
+                <div id="screenRecipes" class="screen screen-recipes">
+                    <div class="recipes-header">
+                        <button class="btn-back" onclick="goToScreen('camera')">←</button>
+                        <h2>Recettes</h2>
+                    </div>
+                    <div class="ingredients-box">
+                        <h3>🥬 Aliments détectés par l'IA</h3>
+                        <p id="detectedIngredients">-</p>
+                    </div>
+                    <div class="recipes-list" id="recipesList"></div>
+                </div>
+
+                <!-- ÉCRAN DÉTAILS -->
+                <div id="screenDetail" class="screen screen-detail">
+                    <div class="recipes-header">
+                        <button class="btn-back" onclick="goToScreen('recipes')">←</button>
+                        <h2 id="recipeName"></h2>
+                    </div>
+                    <div class="recipe-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-label">Temps</div>
+                            <div class="stat-value" id="recipeTime">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-label">Difficulté</div>
+                            <div class="stat-value" id="recipeDifficulty">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-label">Portions</div>
+                            <div class="stat-value" id="recipeServings">-</div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <div class="section-title">🥘 Ingrédients</div>
+                        <div id="ingredientsList"></div>
+                    </div>
+                    <div class="section">
+                        <div class="section-title">👨‍🍳 Préparation</div>
+                        <div id="stepsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Analyse IA en cours...</p>
+            <p style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Claude Vision détecte les aliments</p>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            apiKey: null,
+            videoStream: null,
+            currentCamera: 'environment',
+            currentScreen: 'setup',
+            selectedRecipe: null,
+            recipes: [],
+            ingredients: [],
+            backendUrl: window.location.origin
+        };
+
+        window.addEventListener('load', () => {
+            initTime();
+            loadAPIKey();
+        });
+
+        function initTime() {
+            const updateTime = () => {
+                const now = new Date();
+                document.getElementById('time').textContent = now.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+            updateTime();
+            setInterval(updateTime, 60000);
+        }
+
+        function setupAPI() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!key) {
+                showMessage('❌ Veuillez entrer une clé API', 'error');
+                return;
+            }
+            
+            if (!key.startsWith('sk-ant-')) {
+                showMessage('❌ Clé API invalide! Doit commencer par sk-ant-', 'error');
+                return;
+            }
+            
+            state.apiKey = key;
+            localStorage.setItem('antiGaspiApiKey', key);
+            showMessage('✅ Configuration réussie!', 'success');
+            
+            setTimeout(() => {
+                goToScreen('welcome');
+            }, 600);
+        }
+
+        function loadAPIKey() {
+            const saved = localStorage.getItem('antiGaspiApiKey');
+            if (saved && saved.startsWith('sk-ant-')) {
+                state.apiKey = saved;
+                goToScreen('welcome');
+            }
+        }
+
+        function changeAPI() {
+            goToScreen('setup');
+            document.getElementById('apiKeyInput').value = state.apiKey || '';
+        }
+
+        async function initCamera() {
+            const video = document.getElementById('videoStream');
+            const placeholder = document.getElementById('cameraPlaceholder');
+
+            try {
+                state.videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: state.currentCamera,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+                video.srcObject = state.videoStream;
+                placeholder.style.display = 'none';
+            } catch (error) {
+                placeholder.innerHTML = `<div>❌ Permission refusée</div>`;
+            }
+        }
+
+        function switchCamera() {
+            state.currentCamera = state.currentCamera === 'user' ? 'environment' : 'user';
+            if (state.videoStream) {
+                state.videoStream.getTracks().forEach(t => t.stop());
+            }
+            setTimeout(initCamera, 100);
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('videoStream');
+            const canvas = document.getElementById('captureCanvas');
+            const btn = document.getElementById('captureBtn');
+
+            if (!state.videoStream) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+            btn.disabled = true;
+
+            analyzeImage(imageBase64);
+        }
+
+        async function analyzeImage(imageBase64) {
+            if (!state.apiKey) {
+                showMessage('❌ Clé API manquante', 'error');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${state.backendUrl}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: imageBase64,
+                        apiKey: state.apiKey
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erreur serveur');
+                }
+
+                const data = await response.json();
+
+                state.ingredients = data.ingredients || [];
+                state.recipes = data.recipes || [];
+                
+                displayRecipes();
+                goToScreen('recipes');
+                showMessage(`✅ ${state.ingredients.length} aliments détectés!`, 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('❌ ' + error.message, 'error');
+                document.getElementById('captureBtn').disabled = false;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayRecipes() {
+            document.getElementById('detectedIngredients').textContent = state.ingredients.join(' • ') || '-';
+
+            const list = document.getElementById('recipesList');
+            list.innerHTML = '';
+
+            state.recipes.forEach((recipe, idx) => {
+                const card = document.createElement('div');
+                card.className = 'recipe-card';
+                card.onclick = () => selectRecipe(idx);
+                card.innerHTML = `
+                    <h3>${recipe.name}</h3>
+                    <p>${recipe.description}</p>
+                    <div class="recipe-meta">
+                        <span>⏱️ ${recipe.time}</span>
+                        <span>📊 ${recipe.difficulty}</span>
+                        <span>👥 ${recipe.servings}</span>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function selectRecipe(idx) {
+            state.selectedRecipe = state.recipes[idx];
+            displayRecipeDetail();
+            goToScreen('detail');
+        }
+
+        function displayRecipeDetail() {
+            const r = state.selectedRecipe;
+            document.getElementById('recipeName').textContent = r.name;
+            document.getElementById('recipeTime').textContent = r.time;
+            document.getElementById('recipeDifficulty').textContent = r.difficulty;
+            document.getElementById('recipeServings').textContent = r.servings;
+
+            const ingredList = document.getElementById('ingredientsList');
+            ingredList.innerHTML = '';
+            r.ingredients_needed.forEach(ing => {
+                const item = document.createElement('div');
+                item.className = 'ingredient-item';
+                const parts = ing.split(' - ');
+                const name = parts[0];
+                const qty = parts[1] || '';
+                item.innerHTML = `<span>${name}</span><span class="qty">${qty}</span>`;
+                ingredList.appendChild(item);
+            });
+
+            const stepsList = document.getElementById('stepsList');
+            stepsList.innerHTML = '';
+            r.steps.forEach((step, i) => {
+                const item = document.createElement('div');
+                item.className = 'step-item';
+                item.innerHTML = `
+                    <div class="step-number">${i + 1}</div>
+                    <div class="step-text">${step}</div>
+                `;
+                stepsList.appendChild(item);
+            });
+        }
+
+        function goToScreen(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screenEl = document.getElementById('screen' + screen.charAt(0).toUpperCase() + screen.slice(1));
+            if (screenEl) {
+                screenEl.classList.add('active');
+            }
+            state.currentScreen = screen;
+
+            if (screen === 'camera') {
+                setTimeout(initCamera, 100);
+            }
+        }
+
+        function startApp() {
+            if (!state.apiKey) {
+                showMessage('❌ Clé API manquante', 'error');
+                goToScreen('setup');
+                return;
+            }
+            goToScreen('camera');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+
+        function showMessage(msg, type = 'error') {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = msg;
+            document.body.appendChild(div);
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
