@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,11 +8,11 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 
-// Serve index.html
+// Route racine - serve index.html
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Route pour analyzer les images
@@ -29,7 +28,6 @@ app.post('/api/analyze', async (req, res) => {
             return res.status(400).json({ error: 'Clé API invalide' });
         }
 
-        // Appel à l'API Claude
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
@@ -53,25 +51,7 @@ app.post('/api/analyze', async (req, res) => {
                         },
                         {
                             type: 'text',
-                            text: `Analysez cette image et:
-1. Listez TOUS les aliments/ingrédients visibles (fruits, légumes, viandes, produits, etc)
-2. Générez 3 recettes créatives réalistes et faciles avec ces ingrédients
-
-Répondez UNIQUEMENT en JSON (pas de markdown, pas de code block):
-{
-  "ingredients": ["ingredient1", "ingredient2"],
-  "recipes": [
-    {
-      "name": "Nom de recette",
-      "description": "Description courte",
-      "time": "15 min",
-      "difficulty": "Facile",
-      "servings": "2 pers.",
-      "ingredients_needed": ["ingredient - quantité"],
-      "steps": ["Étape 1", "Étape 2", "Étape 3"]
-    }
-  ]
-}`
+                            text: `Analysez cette image et listez les aliments visibles, puis générez 3 recettes. Répondez UNIQUEMENT en JSON: {"ingredients": [...], "recipes": [...]}`
                         }
                     ]
                 })
@@ -80,43 +60,33 @@ Répondez UNIQUEMENT en JSON (pas de markdown, pas de code block):
 
         if (!response.ok) {
             const error = await response.json();
-            console.error('Claude API Error:', error);
-            return res.status(response.status).json({ 
-                error: error.error?.message || 'Erreur API Claude' 
-            });
+            return res.status(response.status).json({ error: error.error?.message || 'Erreur API' });
         }
 
         const data = await response.json();
         const text = data.content[0].text;
-        
-        // Parser la réponse JSON
         const jsonMatch = text.match(/\{[\s\S]*\}/);
+        
         if (!jsonMatch) {
-            return res.status(400).json({ error: 'Format de réponse invalide' });
+            return res.status(400).json({ error: 'Format invalide' });
         }
 
         const result = JSON.parse(jsonMatch[0]);
-
         res.json({
             ingredients: result.ingredients || [],
             recipes: result.recipes || []
         });
 
     } catch (error) {
-        console.error('Erreur:', error);
-        res.status(500).json({ 
-            error: error.message || 'Erreur serveur' 
-        });
+        console.error('Error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK' });
 });
 
-// Start server
 app.listen(PORT, () => {
-    console.log(`✅ Serveur Anti Gaspi démarré sur port ${PORT}`);
-    console.log(`📱 URL: http://localhost:${PORT}`);
+    console.log(`✅ Server started on port ${PORT}`);
 });
